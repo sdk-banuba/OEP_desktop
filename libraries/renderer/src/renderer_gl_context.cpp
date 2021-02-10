@@ -9,8 +9,8 @@ renderer_gl_context::renderer_gl_context()
 
 renderer_gl_context::~renderer_gl_context()
 {
-    if (std::any_of(textures, textures + TexturesAmount, [](unsigned int a) -> bool {return a != 0;})) {
-        glDeleteTextures(renderer_gl_context::TexturesAmount, textures);
+    if (std::any_of(textures, textures + textures_amount, [](unsigned int a) -> bool {return a != 0;})) {
+        glDeleteTextures(renderer_gl_context::textures_amount, textures);
     }
-    std::fill_n(textures, TexturesAmount, 0);
+    std::fill_n(textures, textures_amount, 0);
 }

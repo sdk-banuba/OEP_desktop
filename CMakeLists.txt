@@ -5,10 +5,6 @@ project(offscreen_effect_player-desktop-cpp)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
-endif()
-
 set(BNB_RESOURCES_FOLDER ${CMAKE_CURRENT_LIST_DIR}/resources)
 set(BNB_THIRD_FOLDER ${CMAKE_CURRENT_LIST_DIR}/third)
 
@@ -51,13 +47,16 @@ target_include_directories(example SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
 
 target_link_libraries(example
     glfw
+    glfw_utils
     offscreen_ep
     opencv
-    show_renderer
+    renderer
     yuv
 )
 
 if (APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
+
     set(EXAMPLE_RESOURCES ${BNB_RESOURCES_FOLDER}/mac/bnb_viewer.icns)
     target_sources(example PRIVATE
         ${EXAMPLE_RESOURCES}
@@ -74,11 +73,11 @@ if (APPLE)
         # The same as stadrard MacOSXBundleInfo.plist.in from CMake but with camera permissions added
         MACOSX_BUNDLE_INFO_PLIST "${BNB_RESOURCES_FOLDER}/mac/Info.plist.in"
 
-        MACOSX_BUNDLE_BUNDLE_NAME           ${EXAMPLE_BUNDLE_NAME}                               # Sets CFBundleName
-        MACOSX_BUNDLE_COPYRIGHT             ${EXAMPLE_COPYRIGHT}                                 # Sets NSHumanReadableCopyright
-        MACOSX_BUNDLE_GUI_IDENTIFIER        "com.banuba.sdk.offsceen_rendering_example_desktop"  # Sets CFBundleIdentifier
-        MACOSX_BUNDLE_ICON_FILE             bnb_viewer.icns                                      # Sets CFBundleIconFile
-        MACOSX_BUNDLE_INFO_STRING           ${EXAMPLE_INFO}                                      # Sets CFBundleGetInfoString
+        MACOSX_BUNDLE_BUNDLE_NAME           ${EXAMPLE_BUNDLE_NAME}            # Sets CFBundleName
+        MACOSX_BUNDLE_COPYRIGHT             ${EXAMPLE_COPYRIGHT}              # Sets NSHumanReadableCopyright
+        MACOSX_BUNDLE_GUI_IDENTIFIER        "com.banuba.sdk.offsceen.sample"  # Sets CFBundleIdentifier
+        MACOSX_BUNDLE_ICON_FILE             bnb_viewer.icns                   # Sets CFBundleIconFile
+        MACOSX_BUNDLE_INFO_STRING           ${EXAMPLE_INFO}                   # Sets CFBundleGetInfoString
 
         # Explicitly skip code signing (CMake tries to turn it on for application bundles)
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""

@@ -10,12 +10,12 @@ namespace bnb {
         renderer_gl_context();
         ~renderer_gl_context();
 
-        static constexpr int TexturesAmount = 2;
+        static constexpr int textures_amount = 2;
 
         frame_surface_handler m_frame_surface;
 
-        int             texture_uniform_location[TexturesAmount];
-        unsigned int    textures[TexturesAmount];
+        int             texture_uniform_location[textures_amount];
+        unsigned int    textures[textures_amount];
     };
 
     namespace SamplerName {

@@ -4,17 +4,24 @@
 
 #include "pixel_buffer.hpp"
 
+using pb_sptr = std::shared_ptr<bnb::interfaces::pixel_buffer>;
+using pb_wptr = std::shared_ptr<bnb::interfaces::pixel_buffer>;
 namespace bnb {
 
-    using pb_callback = std::function<void(std::shared_ptr<interfaces::pixel_buffer>)>;
+    using oep_pb_ready_cb = std::function<void(std::optional<pb_wptr>)>;
 
 namespace interfaces
 {
+    struct orient_format
+    {
+        bnb::camera_orientation orientation;
+        bool is_y_flip;
+    };
+
     class offscreen_effect_player
     {
     public:
         virtual ~offscreen_effect_player() = default;
-
 
         /**
          * An asynchronous method for passing a frame to effect player,
@@ -22,10 +29,12 @@ namespace interfaces
          * 
          * @param image full_image_t - containing a frame for processing 
          * @param callback calling when frame will be processed, containing pointer of pixel_buffer for get bytes
+         * @param target_orient 
          * 
-         * Example process_image_async(image_sptr, [](std::shared_ptr<interfaces::pixel_buffer> pb_sptr){})
+         * Example process_image_async(image_sptr, [](pb_wptr pb_sptr){})
          */
-        virtual void process_image_async(std::shared_ptr<full_image_t> image, pb_callback callback) = 0;
+        virtual void process_image_async(std::shared_ptr<full_image_t> image, oep_pb_ready_cb callback,
+                                         std::optional<orient_format> target_orient) = 0;
 
         /**
          * Load and activate effect async. May be called from any thread

@@ -13,9 +13,6 @@ render_thread::render_thread(GLFWwindow* window, int32_t width, int32_t height)
 
 render_thread::~render_thread()
 {
-    delete m_y_row_ptr;
-    delete m_uv_row_ptr;
-
     m_cancellation_flag = true;
     m_thread.join();
 }

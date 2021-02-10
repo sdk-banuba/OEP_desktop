@@ -13,11 +13,11 @@ target_include_directories(offscreen_ep PUBLIC
 )
 
 target_include_directories(offscreen_ep SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
+target_include_directories(offscreen_ep PUBLIC ${PROJECT_SOURCE_DIR})
 
 target_link_libraries(offscreen_ep
-    Async++
     bnb_effect_player
-    glad
     offscreen_rt
+    utils
     yuv
 )

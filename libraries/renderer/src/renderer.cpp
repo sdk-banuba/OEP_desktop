@@ -48,7 +48,7 @@ using gl_context = renderer_gl_context;
 renderer::renderer(int width, int height) :
     m_program("RendererCamera", vs, fs)
 {
-    GL_CALL(glGenTextures(gl_context::TexturesAmount, m_gl_context.textures));
+    GL_CALL(glGenTextures(gl_context::textures_amount, m_gl_context.textures));
     surface_changed(width, height);
 }
 
@@ -67,10 +67,10 @@ int renderer::draw()
 
     m_program.use();
 
-    m_gl_context.texture_uniform_location[SamplerIndex::Y] = glGetUniformLocation(m_program.handle(), "yTexture");
-    m_gl_context.texture_uniform_location[SamplerIndex::UV] = glGetUniformLocation(m_program.handle(), "uvTexture");
+    m_gl_context.texture_uniform_location[SamplerIndex::Y] = glGetUniformLocation(m_program.handle(), SamplerName::Y);
+    m_gl_context.texture_uniform_location[SamplerIndex::UV] = glGetUniformLocation(m_program.handle(), SamplerName::UV);
 
-    for (auto i = 0u; i < gl_context::TexturesAmount; i++) {
+    for (auto i = 0u; i < gl_context::textures_amount; i++) {
         GL_CALL(glActiveTexture(GL_TEXTURE0 + i));
         GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[i]));
         GL_CALL(glUniform1i(m_gl_context.texture_uniform_location[i], i));

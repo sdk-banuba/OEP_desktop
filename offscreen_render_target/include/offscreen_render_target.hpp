@@ -2,9 +2,8 @@
 
 #include <bnb/types/base_types.hpp>
 
-#include "../../interfaces/offscreen_render_target.hpp"
+#include "interfaces/offscreen_render_target.hpp"
 
-#include "frame_surface_handler.hpp"
 #include "program.hpp"
 
 #include <glad/glad.h>
@@ -13,6 +12,8 @@
 
 namespace bnb
 {
+    class ort_frame_surface_handler;
+
     class offscreen_render_target : public interfaces::offscreen_render_target
     {
     public:
@@ -23,7 +24,7 @@ namespace bnb
         void activate_context() override;
         void prepare_rendering() override;
 
-        void orient_image(camera_orientation orientation, bool is_y_flip) override;
+        void orient_image(interfaces::orient_format orient) override;
 
         void init() override;
 
@@ -47,6 +48,6 @@ namespace bnb
         std::shared_ptr<GLFWwindow> renderer_context;
 
         std::unique_ptr<program> m_program;
-        std::unique_ptr<frame_surface_handler> m_frame_surface_handler;
+        std::unique_ptr<ort_frame_surface_handler> m_frame_surface_handler;
     };
 } // bnb

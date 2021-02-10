@@ -12,12 +12,8 @@ namespace bnb {
 
     class frame_surface_handler
     {
-        uint32_t m_orientation = 0;
-        uint32_t m_y_flip = 0;
+    private:
         static const auto v_size = static_cast<uint32_t>(bnb::camera_orientation::deg_270) + 1;
-        unsigned int m_vao = 0;
-        unsigned int m_vbo = 0;
-        unsigned int m_ebo = 0;
 
     public:
         /**
@@ -66,11 +62,6 @@ namespace bnb {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
 
-        uint32_t get_vertext_index()
-        {
-            return m_orientation + m_y_flip;
-        }
-
         virtual ~frame_surface_handler() final
         {
             if (m_vao != 0)
@@ -93,13 +84,6 @@ namespace bnb {
         frame_surface_handler& operator=(const frame_surface_handler&) = delete;
         frame_surface_handler& operator=(frame_surface_handler&&) = delete;
 
-        void update_vertices_buffer()
-        {
-            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[m_y_flip][m_orientation]), vertices[m_y_flip][m_orientation], GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-        }
-
         void set_orientation(bnb::camera_orientation orientation)
         {
             if (m_orientation != static_cast<uint32_t>(orientation)) {
@@ -120,5 +104,12 @@ namespace bnb {
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
             glBindVertexArray(0);
         }
+
+private:
+        uint32_t m_orientation = 0;
+        uint32_t m_y_flip = 0;
+        unsigned int m_vao = 0;
+        unsigned int m_vbo = 0;
+        unsigned int m_ebo = 0;
     };
 }

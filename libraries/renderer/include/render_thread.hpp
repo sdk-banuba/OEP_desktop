@@ -44,9 +44,6 @@ private:
 
     bnb::color_plane m_cur_y_plane = nullptr;
     bnb::color_plane m_cur_uv_plane = nullptr;
-
-    uint8_t* m_y_row_ptr;
-    uint8_t* m_uv_row_ptr;
 };
 
 } //render

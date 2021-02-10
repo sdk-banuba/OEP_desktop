@@ -5,7 +5,7 @@
 #include <bnb/effect_player/utility.hpp>
 #include <bnb/postprocess/interfaces/postprocess_helper.hpp>
 
-namespace
+namespace bnb
 {
     const char* vs_default_base =
             " precision highp float; \n "
@@ -27,7 +27,179 @@ namespace
             "{\n"
                 "FragColor = texture(uTexture, vTexCoord);\n"
             "}\n";
-}
+
+    class ort_frame_surface_handler
+    {
+    private:
+        static const auto v_size = static_cast<uint32_t>(bnb::camera_orientation::deg_270) + 1;
+
+    public:
+        /**
+        * First array determines texture orientation for vertical flip transformation
+        * Second array determines texture's orientation
+        * Third one determines the plane vertices` positions in correspondence to the texture coordinates
+        */
+        static const float vertices[2][v_size][5 * 4];
+
+        explicit ort_frame_surface_handler(bnb::camera_orientation orientation, bool is_y_flip)
+            : m_orientation(static_cast<uint32_t>(orientation))
+            , m_y_flip(static_cast<uint32_t>(is_y_flip))
+        {
+            glGenVertexArrays(1, &m_vao);
+            glGenBuffers(1, &m_vbo);
+            glGenBuffers(1, &m_ebo);
+
+            glBindVertexArray(m_vao);
+
+            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[m_y_flip][m_orientation]), vertices[m_y_flip][m_orientation], GL_STATIC_DRAW);
+
+            // clang-format off
+
+            unsigned int indices[] = {
+                // clang-format off
+                0, 1, 3, // first triangle
+                1, 2, 3  // second triangle
+                // clang-format on
+            };
+
+            // clang-format on
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+            // position attribute
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) 0);
+            glEnableVertexAttribArray(0);
+            // texture coord attribute
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
+
+        virtual ~ort_frame_surface_handler() final
+        {
+            if (m_vao != 0)
+                glDeleteVertexArrays(1, &m_vao);
+
+            if (m_vbo != 0)
+                glDeleteBuffers(1, &m_vbo);
+
+            if (m_ebo != 0)
+                glDeleteBuffers(1, &m_ebo);
+
+            m_vao = 0;
+            m_vbo = 0;
+            m_ebo = 0;
+        }
+
+        ort_frame_surface_handler(const ort_frame_surface_handler&) = delete;
+        ort_frame_surface_handler(ort_frame_surface_handler&&) = delete;
+
+        ort_frame_surface_handler& operator=(const ort_frame_surface_handler&) = delete;
+        ort_frame_surface_handler& operator=(ort_frame_surface_handler&&) = delete;
+
+        void update_vertices_buffer()
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[m_y_flip][m_orientation]), vertices[m_y_flip][m_orientation], GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
+
+        void set_orientation(bnb::camera_orientation orientation)
+        {
+            if (m_orientation != static_cast<uint32_t>(orientation)) {
+                m_orientation = static_cast<uint32_t>(orientation);
+            }
+        }
+
+        void set_y_flip(bool y_flip)
+        {
+            if (m_y_flip != static_cast<uint32_t>(y_flip)) {
+                m_y_flip = static_cast<uint32_t>(y_flip);
+            }
+        }
+
+        void draw()
+        {
+            glBindVertexArray(m_vao);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+            glBindVertexArray(0);
+        }
+
+    private:
+        uint32_t m_orientation = 0;
+        uint32_t m_y_flip = 0;
+        unsigned int m_vao = 0;
+        unsigned int m_vbo = 0;
+        unsigned int m_ebo = 0;
+    };
+
+    const float ort_frame_surface_handler::vertices[2][ort_frame_surface_handler::v_size][5 * 4] =
+    {{ /* verical flip 0 */
+    {
+            // positions        // texture coords
+            1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // top right
+            1.0f, -1.0f, 0.0f, 1.0f, 1.0f, // bottom right
+            -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // bottom left
+            -1.0f,  1.0f, 0.0f, 0.0f, 0.0f,  // top left
+    },
+    {
+            // positions        // texture coords
+            1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // top right
+            1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+            -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, // bottom left
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,  // top left
+    },
+    {
+            // positions        // texture coords
+            1.0f,  1.0f, 0.0f, 0.0f, 1.0f, // top right
+            1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom right
+            -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom left
+            -1.0f,  1.0f, 0.0f, 1.0f, 1.0f,  // top left
+    },
+    {
+            // positions        // texture coords
+            1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // top right
+            1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // bottom right
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom left
+            -1.0f,  1.0f, 0.0f, 1.0f, 0.0f,  // top left
+    }
+    },
+    { /* verical flip 1 */
+    {
+            // positions        // texture coords
+            1.0f, -1.0f, 0.0f, 1.0f, 1.0f, // top right
+            1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+            -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // bottom left
+            -1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  // top left
+    },
+    {
+            // positions        // texture coords
+            1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // top right
+            1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // bottom right
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, // bottom left
+            -1.0f, -1.0f, 0.0f, 1.0f, 1.0f,  // top left
+    },
+    {
+            // positions        // texture coords
+            1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // top right
+            1.0f,  1.0f, 0.0f, 0.0f, 1.0f, // bottom right
+            -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // bottom left
+            -1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  // top left
+    },
+    {
+            // positions        // texture coords
+            1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top right
+            1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // bottom right
+            -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, // bottom left
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // top left
+    }
+    }};
+} // bnb
 
 namespace bnb
 {
@@ -43,6 +215,12 @@ namespace bnb
         if (m_post_processing_framebuffer != 0) {
             GL_CALL(glDeleteFramebuffers(1, &m_post_processing_framebuffer));
         }
+        if (m_offscreen_render_texture != 0) {
+            GL_CALL(glDeleteTextures(1, &m_offscreen_render_texture));
+        }
+        if (m_offscreen_post_processuing_render_texture != 0) {
+            GL_CALL(glDeleteTextures(1, &m_offscreen_post_processuing_render_texture));
+        }
     }
 
     void offscreen_render_target::init()
@@ -52,10 +230,9 @@ namespace bnb
 
         GL_CALL(glGenFramebuffers(1, &m_framebuffer));
         GL_CALL(glGenFramebuffers(1, &m_post_processing_framebuffer));
-        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer));
 
         m_program = std::make_unique<program>("OrientationChange", vs_default_base, ps_default_base);
-        m_frame_surface_handler = std::make_unique<frame_surface_handler>(bnb::camera_orientation::deg_0, false);
+        m_frame_surface_handler = std::make_unique<ort_frame_surface_handler>(bnb::camera_orientation::deg_0, false);
     }
 
     void offscreen_render_target::create_context()
@@ -139,11 +316,11 @@ namespace bnb
         GL_CALL(glBindTexture(GL_TEXTURE_2D, m_offscreen_render_texture));
     }
 
-    void offscreen_render_target::orient_image(camera_orientation orientation, bool is_y_flip)
+    void offscreen_render_target::orient_image(interfaces::orient_format orient)
     {
         GL_CALL(glFlush());
 
-        if (orientation == camera_orientation::deg_0 && !is_y_flip) {
+        if (orient.orientation == camera_orientation::deg_0 && !orient.is_y_flip) {
             return;
         }
 
@@ -158,8 +335,8 @@ namespace bnb
 
         prepare_post_processing_rendering();
         m_program->use();
-        m_frame_surface_handler->set_orientation(orientation);
-        m_frame_surface_handler->set_y_flip(is_y_flip);
+        m_frame_surface_handler->set_orientation(orient.orientation);
+        m_frame_surface_handler->set_y_flip(orient.is_y_flip);
         // Call once for perf
         m_frame_surface_handler->update_vertices_buffer();
         m_frame_surface_handler->draw();

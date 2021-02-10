@@ -2,6 +2,8 @@
 
 #include <bnb/types/base_types.hpp>
 
+#include "offscreen_effect_player.hpp"
+
 namespace bnb::interfaces
 {
     class offscreen_render_target
@@ -31,16 +33,14 @@ namespace bnb::interfaces
          */
         virtual void prepare_rendering() = 0;
 
-
         /**
          * Orientates the image
          * 
-         * @param orientation orientation
-         * @param is_y_flip set flip by y
+         * @param orient
          * 
          * Example prepare_rendering()
          */
-        virtual void orient_image(bnb::camera_orientation orientation, bool is_y_flip) = 0;
+        virtual void orient_image(orient_format orient) = 0;
 
         /**
          * Reading current buffer of active texture
