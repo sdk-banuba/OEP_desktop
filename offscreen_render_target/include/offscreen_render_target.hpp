@@ -10,9 +10,19 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+class GLFWwindow;
+
 namespace bnb
 {
     class ort_frame_surface_handler;
+
+    struct DestroyglfwWin{
+        void operator()(GLFWwindow* ptr){
+            glfwDestroyWindow(ptr);
+        }
+    };
+
+    using smart_GLFWwindow = std::unique_ptr<GLFWwindow, DestroyglfwWin>;
 
     class offscreen_render_target : public interfaces::offscreen_render_target
     {
@@ -45,7 +55,7 @@ namespace bnb
         GLuint m_offscreen_render_texture{ 0 };
         GLuint m_offscreen_post_processuing_render_texture{ 0 };
 
-        std::shared_ptr<GLFWwindow> renderer_context;
+        smart_GLFWwindow renderer_context;
 
         std::unique_ptr<program> m_program;
         std::unique_ptr<ort_frame_surface_handler> m_frame_surface_handler;

@@ -44,12 +44,6 @@ namespace bnb
         void call_js_method(const std::string& method, const std::string& param) override;
 
     private:
-        template<typename F>
-        auto schedule(const F& f)
-        {
-            return async::spawn(m_scheduler, f);
-        }
-
         friend class pixel_buffer;
 
         void read_current_buffer(std::function<void(bnb::data_t data)> callback);

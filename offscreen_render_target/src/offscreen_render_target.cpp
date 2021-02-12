@@ -240,7 +240,7 @@ namespace bnb
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
         renderer_context.reset();
-        renderer_context = std::shared_ptr<GLFWwindow>(glfwCreateWindow(m_width, m_height, "", nullptr, nullptr));
+        renderer_context = smart_GLFWwindow(glfwCreateWindow(m_width, m_height, "", nullptr, nullptr));
 
         glfwMakeContextCurrent(renderer_context.get());
         load_glad_functions();
