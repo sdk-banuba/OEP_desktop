@@ -13,8 +13,31 @@ namespace bnb
         , m_height(height)
         , m_orientation(orientation) {}
 
+    void pixel_buffer::lock()
+    {
+        ++lock_count;
+    }
+
+    void pixel_buffer::unlock()
+    {
+        --lock_count;
+    }
+
+    bool pixel_buffer::is_lock()
+    {
+        if (lock_count == 0) {
+            return false;
+        }
+        return true;
+    }
+
     void pixel_buffer::get_rgba(oep_image_ready_cb callback)
     {
+        if (!is_lock()) {
+            std::cout << "[WARNING] needed lock the pixel_buffer for using" << std::endl;
+            callback(std::nullopt);
+        }
+
         if (auto oep_sp = m_oep_ptr.lock()) {
             auto convert_callback = [this, callback](data_t data) {
                 bnb::image_format frm(m_width, m_height, m_orientation, false, 0, std::nullopt);
@@ -30,6 +53,11 @@ namespace bnb
 
     void pixel_buffer::get_nv12(oep_image_ready_cb callback)
     {
+        if (!is_lock()) {
+            std::cout << "[WARNING] needed lock the pixel_buffer for using" << std::endl;
+            callback(std::nullopt);
+        }
+
         if (auto oep_sp = m_oep_ptr.lock()) {
             auto convert_callback = [this, callback](data_t data) {
                 std::vector<uint8_t> y_plane(m_width * m_height);

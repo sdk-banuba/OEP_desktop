@@ -5,11 +5,16 @@
 #include <GLFW/glfw3.h>
 
 #include <thread>
-#include <async++.h>
 
 #include "renderer.hpp"
 
 namespace render {
+
+struct nv12_planes
+{
+    bnb::color_plane y_plane;
+    bnb::color_plane uv_plane;
+};
 
 class render_thread
 {
@@ -21,14 +26,7 @@ public:
     void surface_changed(int32_t width, int32_t height);
 
     void update_data(bnb::full_image_t image);
-    void update_data(bnb::data_t data);
-    void update_context();
-
-    template<typename F>
-    auto schedule(const F& f)
-    {
-        return async::spawn(m_scheduler, f);
-    }
+    void draw();
 
 private:
     void thread_func();
@@ -37,13 +35,15 @@ private:
     GLFWwindow* m_window;
     std::thread m_thread;
     std::atomic<bool> m_cancellation_flag;
-    async::fifo_scheduler m_scheduler;
 
     int32_t m_cur_width;
     int32_t m_cur_height;
 
-    bnb::color_plane m_cur_y_plane = nullptr;
-    bnb::color_plane m_cur_uv_plane = nullptr;
+    nv12_planes m_update_buffer;
+    nv12_planes m_show_buffer;
+
+    std::atomic<bool> m_using_frame = false;
+    std::atomic<bool> m_need_swap = false;
 };
 
 } //render

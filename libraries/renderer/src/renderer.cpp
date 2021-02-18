@@ -59,11 +59,9 @@ void renderer::surface_changed(int32_t width, int32_t height)
     GL_CALL(glViewport(0, 0, width, height));
 }
 
-int renderer::draw()
+void renderer::draw(color_plane y_plane, color_plane uv_plane)
 {
-    if (!m_need_draw) {
-        return -1;
-    }
+    update_camera_texture(y_plane, uv_plane);
 
     m_program.use();
 
@@ -79,23 +77,17 @@ int renderer::draw()
     m_gl_context.m_frame_surface.draw();
 
     m_program.unuse();
-
-    m_need_draw = false;
-    return 1;
 }
 
 void renderer::update_camera_texture(color_plane y_plane, color_plane uv_plane)
 {
-    m_cur_y_plane = y_plane;
-    m_cur_uv_plane = uv_plane;
-
     GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[SamplerIndex::Y]));
     GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
     GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
     GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG
                  , m_cur_width, m_cur_height, 0,
-                 GL_RED, GL_UNSIGNED_BYTE, m_cur_y_plane.get()));
+                 GL_RED, GL_UNSIGNED_BYTE, y_plane.get()));
 
     GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[SamplerIndex::UV]));
     GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -103,9 +95,7 @@ void renderer::update_camera_texture(color_plane y_plane, color_plane uv_plane)
 
     GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG
                      , m_cur_width / 2, m_cur_height / 2, 0,
-                 GL_RG, GL_UNSIGNED_BYTE, m_cur_uv_plane.get()));
+                 GL_RG, GL_UNSIGNED_BYTE, uv_plane.get()));
 
     GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-
-    m_need_draw = true;
 }

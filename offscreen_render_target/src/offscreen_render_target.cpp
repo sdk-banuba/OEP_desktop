@@ -225,7 +225,13 @@ namespace bnb
 
     void offscreen_render_target::init()
     {
-        create_context();
+        #ifdef __APPLE__
+            m_main_thread_runner.run_on_main_queue([this]() { 
+                create_context();
+            });
+        #else
+            create_context();
+        #endif
         activate_context();
 
         GL_CALL(glGenFramebuffers(1, &m_framebuffer));
@@ -238,11 +244,17 @@ namespace bnb
     void offscreen_render_target::create_context()
     {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        #ifdef __APPLE__
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        #endif
 
-        renderer_context.reset();
-        renderer_context = smart_GLFWwindow(glfwCreateWindow(m_width, m_height, "", nullptr, nullptr));
+        m_renderer_context.reset();
+        m_renderer_context = smart_GLFWwindow(glfwCreateWindow(m_width, m_height, "", nullptr, nullptr));
 
-        glfwMakeContextCurrent(renderer_context.get());
+        glfwMakeContextCurrent(m_renderer_context.get());
         load_glad_functions();
         GL_CALL(glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS));
         glfwMakeContextCurrent(nullptr);
@@ -250,8 +262,8 @@ namespace bnb
 
     void offscreen_render_target::activate_context()
     {
-        if (renderer_context) {
-            glfwMakeContextCurrent(renderer_context.get());
+        if (m_renderer_context) {
+            glfwMakeContextCurrent(m_renderer_context.get());
         }
     }
 

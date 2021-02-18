@@ -39,14 +39,13 @@ int main()
         auto image_ptr = std::make_shared<bnb::full_image_t>(std::move(image));
 
         // Callback for received pixel buffer from the offscreen effect player
-        auto get_pixel_buffer_callback = [image_ptr, render_t](std::optional<pb_wptr> pb) {
+        auto get_pixel_buffer_callback = [image_ptr, render_t](std::optional<pb_sptr> pb) {
             if (pb.has_value()) {
-                // Callback for rendering
-                auto render_callback = [render_t](bnb::full_image_t image) {
-                    render_t->update_data(std::move(image));
-                    render_t->schedule([render_t]() mutable {
-                        render_t->update_context();
-                    });
+                // Callback for update data in render thread
+                auto render_callback = [render_t](std::optional<bnb::full_image_t> image) {
+                    if (image.has_value()) {
+                        render_t->update_data(std::move((*image)));
+                    }
                 };
                 // Get the full_image_t contain nv12 from the offscreen render target
                 (*pb)->get_nv12(render_callback);
