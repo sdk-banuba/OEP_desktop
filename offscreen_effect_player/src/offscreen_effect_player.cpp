@@ -83,6 +83,19 @@ namespace bnb
         m_scheduler.enqueue(task);
     }
 
+    void offscreen_effect_player::surface_changed(int32_t width, int32_t height)
+    {
+        auto task = [this, width, height]() {
+            m_ep->surface_changed(width, height);
+            m_ep->effect_manager()->set_effect_size(width, height);
+
+            m_current_frame.reset();
+            m_ort->surface_changed(width, height);
+        };
+
+        m_scheduler.enqueue(task);
+    }
+
     void offscreen_effect_player::load_effect(const std::string& effect_path)
     {
         auto task = [this, &effect_path]() {

@@ -215,11 +215,18 @@ namespace bnb
         if (m_post_processing_framebuffer != 0) {
             GL_CALL(glDeleteFramebuffers(1, &m_post_processing_framebuffer));
         }
+        delete_textures();
+    }
+
+    void offscreen_render_target::delete_textures()
+    {
         if (m_offscreen_render_texture != 0) {
             GL_CALL(glDeleteTextures(1, &m_offscreen_render_texture));
+            m_offscreen_render_texture = 0;
         }
         if (m_offscreen_post_processuing_render_texture != 0) {
             GL_CALL(glDeleteTextures(1, &m_offscreen_post_processuing_render_texture));
+            m_offscreen_post_processuing_render_texture = 0;
         }
     }
 
@@ -239,6 +246,27 @@ namespace bnb
 
         m_program = std::make_unique<program>("OrientationChange", vs_default_base, ps_default_base);
         m_frame_surface_handler = std::make_unique<ort_frame_surface_handler>(bnb::camera_orientation::deg_0, false);
+    }
+
+    void offscreen_render_target::surface_changed(int32_t width, int32_t height)
+    {
+        m_width = width;
+        m_height = height;
+
+        m_renderer_context.reset();
+
+        auto create_context_task = [this]() {
+            m_renderer_context = smart_GLFWwindow(glfwCreateWindow(m_width, m_height, "", nullptr, nullptr));
+        };
+
+        #ifdef __APPLE__
+            m_main_thread_runner.run_on_main_queue(create_context_task);
+        #else
+            create_context_task();
+        #endif
+
+        activate_context();
+        delete_textures();
     }
 
     void offscreen_render_target::create_context()

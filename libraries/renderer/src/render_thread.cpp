@@ -18,7 +18,7 @@ namespace render
     void render_thread::surface_changed(int32_t width, int32_t height)
     {
         if (m_renderer) {
-            m_renderer->surface_changed(width, height);
+            m_renderer->surface_change(width, height);
         }
     }
 

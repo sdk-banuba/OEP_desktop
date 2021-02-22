@@ -37,6 +37,17 @@ namespace interfaces
                                          std::optional<orient_format> target_orient) = 0;
 
         /**
+         * Notify about rendering surface being resized.
+         * Must be called from the render thread.
+         * 
+         * @param width New width for the rendering surface
+         * @param height New height for the rendering surface
+         * 
+         * Example surface_changed(1280, 720)
+         */
+        virtual void surface_changed(int32_t width, int32_t height) = 0;
+
+        /**
          * Load and activate effect async. May be called from any thread
          * 
          * @param effect_path Path to directory of effect

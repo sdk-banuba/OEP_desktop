@@ -35,12 +35,13 @@ namespace bnb
 
         ~offscreen_render_target();
 
+        void init() override;
+
+        void surface_changed(int32_t width, int32_t height) override;
+
         void activate_context() override;
         void prepare_rendering() override;
-
         void orient_image(interfaces::orient_format orient) override;
-
-        void init() override;
 
         bnb::data_t read_current_buffer() override;
 
@@ -50,6 +51,8 @@ namespace bnb
 
         void generate_texture(GLuint& texture);
         void prepare_post_processing_rendering();
+
+        void delete_textures();
 
         uint32_t m_width;
         uint32_t m_height;

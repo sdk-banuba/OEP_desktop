@@ -35,6 +35,8 @@ namespace bnb
         void process_image_async(std::shared_ptr<full_image_t> image, oep_pb_ready_cb callback,
                                  std::optional<interfaces::orient_format> target_orient) override;
 
+        void surface_changed(int32_t width, int32_t height) override;
+
         void load_effect(const std::string& effect_path) override;
         void unload_effect() override;
 
