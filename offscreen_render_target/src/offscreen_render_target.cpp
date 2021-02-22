@@ -201,7 +201,9 @@ namespace bnb
     }};
 } // bnb
 
-extern void run_on_main_queue(std::function<void()> f);
+#ifdef __APPLE__
+    extern void run_on_main_queue(std::function<void()> f);
+#endif
 
 namespace bnb
 {

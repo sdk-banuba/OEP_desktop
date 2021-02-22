@@ -12,15 +12,16 @@ namespace bnb::interfaces
         virtual ~pixel_buffer() = default;
 
         /**
-         * Locks the pixel_buffer. Must be called before working with textures.
-         * Locking ignores the use of the process_image_async in OEP.
+         * Lock pixel buffer. If you want to keep lock of pixel buffer
+         * longer than output image callback scope you should lock pixel buffer.
          * 
          * Example lock()
          */
         virtual void lock() = 0;
 
         /**
-         * Unlocks pixel_buffer. Must be called after working with textures.
+         * Unlock pixel_buffer. Must be called if user explicitly called lock()
+         * after the work to process output pixel buffer completed.
          * 
          * Example unlock()
          */

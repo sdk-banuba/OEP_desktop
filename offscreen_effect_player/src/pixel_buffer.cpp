@@ -25,7 +25,7 @@ namespace bnb
             return;
         }
 
-        throw std::exception();
+        throw std::runtime_error("pixel_buffer already unlocked");
     }
 
     bool pixel_buffer::is_locked()
