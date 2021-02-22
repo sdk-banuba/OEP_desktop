@@ -1,8 +1,8 @@
-#import "helper.h"
+#import <Foundation/Foundation.h>
 
-@implementation helper
+#include <functional>
 
-void main_queue_runner::run_on_main_queue(std::function<void()> f)
+void run_on_main_queue(std::function<void()> f)
 {
     if ([NSThread isMainThread])
     {
@@ -15,5 +15,3 @@ void main_queue_runner::run_on_main_queue(std::function<void()> f)
         });
     }
 }
-
-@end

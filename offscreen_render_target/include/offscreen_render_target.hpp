@@ -10,10 +10,6 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#ifdef __APPLE__
-    #include "main_queue_runner.h"
-#endif
-
 class GLFWwindow;
 
 namespace bnb
@@ -63,10 +59,6 @@ namespace bnb
         GLuint m_offscreen_post_processuing_render_texture{ 0 };
 
         smart_GLFWwindow m_renderer_context;
-
-        #ifdef __APPLE__
-            main_queue_runner m_main_thread_runner;
-        #endif
 
         std::unique_ptr<program> m_program;
         std::unique_ptr<ort_frame_surface_handler> m_frame_surface_handler;

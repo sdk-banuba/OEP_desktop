@@ -201,6 +201,8 @@ namespace bnb
     }};
 } // bnb
 
+extern void run_on_main_queue(std::function<void()> f);
+
 namespace bnb
 {
     offscreen_render_target::offscreen_render_target(uint32_t width, uint32_t height)
@@ -233,7 +235,7 @@ namespace bnb
     void offscreen_render_target::init()
     {
         #ifdef __APPLE__
-            m_main_thread_runner.run_on_main_queue([this]() { 
+            run_on_main_queue([this]() { 
                 create_context();
             });
         #else
@@ -260,7 +262,7 @@ namespace bnb
         };
 
         #ifdef __APPLE__
-            m_main_thread_runner.run_on_main_queue(create_context_task);
+            run_on_main_queue(create_context_task);
         #else
             create_context_task();
         #endif
