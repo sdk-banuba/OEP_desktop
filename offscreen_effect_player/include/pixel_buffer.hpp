@@ -16,14 +16,14 @@ namespace bnb
 
         void lock() override;
         void unlock() override;
-        bool is_lock() override;
+        bool is_locked() override;
 
         void get_rgba(oep_image_ready_cb callback) override;
         void get_nv12(oep_image_ready_cb callback) override;
 
     private:
         oep_wptr m_oep_ptr;
-        uint8_t lock_count = 0;
+        std::atomic<uint8_t> lock_count = 0;
 
         uint32_t m_width = 0;
         uint32_t m_height = 0;

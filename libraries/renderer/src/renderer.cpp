@@ -43,59 +43,87 @@ namespace
 
 using namespace bnb;
 
-using gl_context = renderer_gl_context;
-
-renderer::renderer(int width, int height) :
-    m_program("RendererCamera", vs, fs)
+namespace render
 {
-    GL_CALL(glGenTextures(gl_context::textures_amount, m_gl_context.textures));
-    surface_changed(width, height);
-}
+    using gl_context = renderer_gl_context;
 
-void renderer::surface_changed(int32_t width, int32_t height)
-{
-    m_cur_width = width;
-    m_cur_height = height;
-    GL_CALL(glViewport(0, 0, width, height));
-}
-
-void renderer::draw(color_plane y_plane, color_plane uv_plane)
-{
-    update_camera_texture(y_plane, uv_plane);
-
-    m_program.use();
-
-    m_gl_context.texture_uniform_location[SamplerIndex::Y] = glGetUniformLocation(m_program.handle(), SamplerName::Y);
-    m_gl_context.texture_uniform_location[SamplerIndex::UV] = glGetUniformLocation(m_program.handle(), SamplerName::UV);
-
-    for (auto i = 0u; i < gl_context::textures_amount; i++) {
-        GL_CALL(glActiveTexture(GL_TEXTURE0 + i));
-        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[i]));
-        GL_CALL(glUniform1i(m_gl_context.texture_uniform_location[i], i));
+    renderer::renderer(int width, int height) :
+        m_program("RendererCamera", vs, fs)
+    {
+        GL_CALL(glGenTextures(gl_context::textures_amount, m_gl_context.textures));
+        surface_changed(width, height);
     }
 
-    m_gl_context.m_frame_surface.draw();
+    void renderer::surface_changed(int32_t width, int32_t height)
+    {
+        m_cur_width = width;
+        m_cur_height = height;
+        GL_CALL(glViewport(0, 0, width, height));
+    }
 
-    m_program.unuse();
-}
+    void renderer::update_data(bnb::full_image_t image)
+    {
+        if (m_texture_updated && m_rendering) {
+            return;
+        }
 
-void renderer::update_camera_texture(color_plane y_plane, color_plane uv_plane)
-{
-    GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[SamplerIndex::Y]));
-    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        m_texture_updated = false;
+        const auto& yuv = image.get_data<bnb::yuv_image_t>();
+        m_update_buffer.y_plane = yuv.y_plane;
+        m_update_buffer.uv_plane = yuv.uv_plane;
+        m_texture_updated = true;
+    }
 
-    GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG
-                 , m_cur_width, m_cur_height, 0,
-                 GL_RED, GL_UNSIGNED_BYTE, y_plane.get()));
+    bool renderer::draw()
+    {
+        if (!m_texture_updated) {
+            return false;
+        }
 
-    GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[SamplerIndex::UV]));
-    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-    GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        m_rendering = true;
 
-    GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG
-                     , m_cur_width / 2, m_cur_height / 2, 0,
-                 GL_RG, GL_UNSIGNED_BYTE, uv_plane.get()));
+        std::swap(m_update_buffer, m_show_buffer);
+        m_texture_updated = false;
 
-    GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-}
+        update_camera_texture();
+
+        m_program.use();
+
+        m_gl_context.texture_uniform_location[SamplerIndex::Y] = glGetUniformLocation(m_program.handle(), SamplerName::Y);
+        m_gl_context.texture_uniform_location[SamplerIndex::UV] = glGetUniformLocation(m_program.handle(), SamplerName::UV);
+
+        for (auto i = 0u; i < gl_context::textures_amount; i++) {
+            GL_CALL(glActiveTexture(GL_TEXTURE0 + i));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[i]));
+            GL_CALL(glUniform1i(m_gl_context.texture_uniform_location[i], i));
+        }
+
+        m_gl_context.m_frame_surface.draw();
+
+        m_program.unuse();
+        m_rendering = false;
+
+        return true;
+    }
+
+    void renderer::update_camera_texture()
+    {
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[SamplerIndex::Y]));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG
+                    , m_cur_width, m_cur_height, 0,
+                    GL_RED, GL_UNSIGNED_BYTE, m_show_buffer.y_plane.get()));
+
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[SamplerIndex::UV]));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG
+                        , m_cur_width / 2, m_cur_height / 2, 0,
+                    GL_RG, GL_UNSIGNED_BYTE, m_show_buffer.uv_plane.get()));
+
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+    }
+} // render

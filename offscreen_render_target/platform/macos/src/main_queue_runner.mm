@@ -1,6 +1,6 @@
-#import "main_queue_runner_OChelper.h"
+#import "helper.h"
 
-@implementation main_queue_runner_OChelper
+@implementation helper
 
 void main_queue_runner::run_on_main_queue(std::function<void()> f)
 {

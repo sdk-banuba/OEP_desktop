@@ -12,15 +12,15 @@ namespace bnb::interfaces
         virtual ~pixel_buffer() = default;
 
         /**
-         * Locks the pixel_buffer. Needed use when working with the textures after OEP processing.
+         * Locks the pixel_buffer. Must be called before working with textures.
          * Locking ignores the use of the process_image_async in OEP.
          * 
-         * Example lock([]()
+         * Example lock()
          */
         virtual void lock() = 0;
 
         /**
-         * Unlocks pixel_buffer. Must be used after use.
+         * Unlocks pixel_buffer. Must be called after working with textures.
          * 
          * Example unlock()
          */
@@ -31,9 +31,9 @@ namespace bnb::interfaces
          * 
          * @return true if pixel_buffer locked else false
          * 
-         * Example is_lock()
+         * Example is_locked()
          */
-        virtual bool is_lock() = 0;
+        virtual bool is_locked() = 0;
 
         /**
          * In thread with active texture get pixel bytes from Offscreen_render_target and

@@ -8,8 +8,8 @@
 
 #define BNB_GLSL_VERSION "#version 330 core \n"
 
-namespace bnb {
-
+namespace render
+{
     class frame_surface_handler
     {
     private:
@@ -112,4 +112,4 @@ private:
         unsigned int m_vbo = 0;
         unsigned int m_ebo = 0;
     };
-}
+} // render

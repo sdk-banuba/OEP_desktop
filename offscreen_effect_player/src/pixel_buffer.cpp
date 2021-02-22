@@ -20,10 +20,15 @@ namespace bnb
 
     void pixel_buffer::unlock()
     {
-        --lock_count;
+        if (lock_count > 0) {
+            --lock_count;
+            return;
+        }
+
+        throw std::exception();
     }
 
-    bool pixel_buffer::is_lock()
+    bool pixel_buffer::is_locked()
     {
         if (lock_count == 0) {
             return false;
@@ -33,8 +38,8 @@ namespace bnb
 
     void pixel_buffer::get_rgba(oep_image_ready_cb callback)
     {
-        if (!is_lock()) {
-            std::cout << "[WARNING] needed lock the pixel_buffer for using" << std::endl;
+        if (!is_locked()) {
+            std::cout << "[WARNING] The pixel buffer must be locked" << std::endl;
             callback(std::nullopt);
         }
 
@@ -53,8 +58,8 @@ namespace bnb
 
     void pixel_buffer::get_nv12(oep_image_ready_cb callback)
     {
-        if (!is_lock()) {
-            std::cout << "[WARNING] needed lock the pixel_buffer for using" << std::endl;
+        if (!is_locked()) {
+            std::cout << "[WARNING] The pixel buffer must be locked" << std::endl;
             callback(std::nullopt);
         }
 

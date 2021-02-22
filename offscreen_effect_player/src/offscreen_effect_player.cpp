@@ -53,7 +53,7 @@ namespace bnb
                 image->get_format().width, image->get_format().height, image->get_format().orientation);
         }
 
-        if (m_current_frame->is_lock()) {
+        if (m_current_frame->is_locked()) {
             std::cout << "[Warning] The interface for processing the previous frame is lock" << std::endl;
             return;
         }
