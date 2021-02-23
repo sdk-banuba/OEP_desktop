@@ -31,8 +31,8 @@ int main()
 
     // Make glfw_window and render_thread only for show result of OEP
     std::shared_ptr<glfw_window> window = std::make_shared<glfw_window>("");
-    std::shared_ptr<render::render_thread> render_t =
-            std::make_shared<render::render_thread>(window->get_window(), width, height);
+    std::shared_ptr<bnb::render::render_thread> render_t =
+            std::make_shared<bnb::render::render_thread>(window->get_window(), width, height);
 
     // Callback for received frame from the camera
     auto ef_cb = [&oep, render_t](bnb::full_image_t image) {

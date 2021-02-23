@@ -2,7 +2,7 @@
 
 #include <libyuv.h>
 
-namespace render
+namespace bnb::render
 {
     render_thread::render_thread(GLFWwindow* window, int32_t width, int32_t height)
         : m_window(window)
@@ -22,7 +22,7 @@ namespace render
         }
     }
 
-    void render_thread::update_data(bnb::full_image_t image)
+    void render_thread::update_data(full_image_t image)
     {
         m_renderer->update_data(std::move(image));
     }
@@ -46,4 +46,4 @@ namespace render
 
         glfwMakeContextCurrent(nullptr);
     }
-} //render
+} // bnb::render

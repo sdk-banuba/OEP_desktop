@@ -23,7 +23,7 @@ namespace bnb
 
     private:
         oep_wptr m_oep_ptr;
-        std::atomic<uint8_t> lock_count = 0;
+        uint8_t lock_count = 0;
 
         uint32_t m_width = 0;
         uint32_t m_height = 0;

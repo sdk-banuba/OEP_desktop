@@ -41,9 +41,7 @@ namespace
         "} \n";
 }
 
-using namespace bnb;
-
-namespace render
+namespace bnb::render
 {
     using gl_context = renderer_gl_context;
 
@@ -61,14 +59,14 @@ namespace render
         m_surface_changed = true;
     }
 
-    void renderer::update_data(bnb::full_image_t image)
+    void renderer::update_data(full_image_t image)
     {
         if (m_texture_updated && m_rendering) {
             return;
         }
 
         m_texture_updated = false;
-        const auto& yuv = image.get_data<bnb::yuv_image_t>();
+        const auto& yuv = image.get_data<yuv_image_t>();
         m_update_buffer.y_plane = yuv.y_plane;
         m_update_buffer.uv_plane = yuv.uv_plane;
         m_texture_updated = true;
@@ -131,4 +129,4 @@ namespace render
 
         GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
     }
-} // render
+} // bnb::render

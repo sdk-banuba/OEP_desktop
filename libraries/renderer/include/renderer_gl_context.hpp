@@ -2,7 +2,8 @@
 
 #include "frame_surface_handler.hpp"
 
-namespace render {
+namespace bnb::render
+{
     class renderer_gl_context
     {
     public:
@@ -26,4 +27,4 @@ namespace render {
         static const int Y = 0;
         static const int UV = 1;
     }
-} // render
+} // bnb::render

@@ -8,7 +8,8 @@
 
 #include "renderer.hpp"
 
-namespace render {
+namespace bnb::render
+{
     class render_thread
     {
     public:
@@ -17,7 +18,7 @@ namespace render {
         ~render_thread();
 
         void surface_changed(int32_t width, int32_t height);
-        void update_data(bnb::full_image_t image);
+        void update_data(full_image_t image);
 
     private:
         void thread_func(int32_t width, int32_t height);
@@ -27,4 +28,4 @@ namespace render {
         std::thread m_thread;
         std::atomic<bool> m_cancellation_flag;
     };
-} //render
+} // bnb::render

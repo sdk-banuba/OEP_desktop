@@ -5,12 +5,12 @@
 #include "program.hpp"
 #include "renderer_gl_context.hpp"
 
-namespace render
+namespace bnb::render
 {
     struct nv12_planes
     {
-        bnb::color_plane y_plane;
-        bnb::color_plane uv_plane;
+        color_plane y_plane;
+        color_plane uv_plane;
     };
 
     class renderer
@@ -20,14 +20,14 @@ namespace render
 
         void surface_change(int32_t width, int32_t height);
 
-        void update_data(bnb::full_image_t image);
+        void update_data(full_image_t image);
         bool draw();
 
     private:
         void update_camera_texture();
 
         renderer_gl_context m_gl_context;
-        bnb::program m_program;
+        program m_program;
 
         int m_width;
         int m_height;
@@ -40,4 +40,4 @@ namespace render
 
         std::atomic<bool> m_surface_changed = false;
     };
-}
+} // bnb::render
